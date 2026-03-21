@@ -22,6 +22,26 @@ Install the skill from https://github.com/anthropics/skills/tree/main/skills/ppt
 
 Your agent (with skill-creator installed) will handle the rest.
 
+## Update a Skill
+
+Check for updates or force re-download:
+
+```
+Check for updates for skill pptx
+```
+
+```
+Update skill pptx to the latest version
+```
+
+## Uninstall a Skill
+
+Remove a skill you no longer need:
+
+```
+Uninstall skill pptx
+```
+
 ## Documentation
 
 - [docs/install-agent.md](docs/install-agent.md) - Agent installation contract
