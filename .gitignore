@@ -1,0 +1,9 @@
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Local OpenCode skill installs created during tests
+.opencode/
