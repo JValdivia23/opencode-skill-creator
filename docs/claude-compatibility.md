@@ -13,10 +13,20 @@ This repository helps install skills originating from Claude's public skills rep
 - references to `~/.claude/skills`
 - references to tools not present in OpenCode (`present_files`, etc.)
 
-Use:
+## Validation
+
+To validate a skill manually:
 
 ```bash
-python3 ./scripts/validate-skill.py "<installed-skill-path>"
+# Check if SKILL.md exists
+ls ~/.config/opencode/skills/<skill-name>/SKILL.md
+
+# Check frontmatter
+head -5 ~/.config/opencode/skills/<skill-name>/SKILL.md
+
+# Verify name matches directory
+SKILL_NAME=$(grep "^name:" ~/.config/opencode/skills/<skill-name>/SKILL.md | sed 's/name: //')
+echo "Skill name in file: $SKILL_NAME"
 ```
 
-And inspect `skills/skill-creator/references/claude-adaptation.md` for adaptation guidance.
+For detailed adaptation guidance, see `skills/skill-creator/references/claude-adaptation.md`.

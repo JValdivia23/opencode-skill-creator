@@ -1,59 +1,90 @@
 # Human Installation Guide
 
-This guide is for people using the `opencode-skill-creator` repository directly.
+This guide is for people installing the `skill-creator` skill.
 
 Important: this project does **not** auto-install third-party skills by itself. You decide which skills to install, when to install them, and where to install them.
 
-## 1) Install this repository's `skill-creator`
+## Installation Method: Use Your AI Agent
 
-From the repo root:
+The easiest way to install skill-creator is to give the URL to your AI agent (OpenCode, Claude, etc.):
 
-```bash
-# Project-local install (recommended first)
-./scripts/install-skill-creator.sh --scope local --force
-
-# Global install (available in all projects)
-./scripts/install-skill-creator.sh --scope global --force
+```
+Install skill-creator from https://github.com/JValdivia23/opencode-skill-creator
 ```
 
-## 2) Verify installation
+Your agent will read the installation instructions and download the necessary files.
+
+## Manual Installation (Terminal)
+
+If you prefer to install manually using curl:
 
 ```bash
-# Local check
-./scripts/doctor-skill.sh skill-creator --scope local
+# Create directories
+mkdir -p ~/.config/opencode/skills/skill-creator/references/templates
 
-# Global check
-./scripts/doctor-skill.sh skill-creator --scope global
+# Download SKILL.md
+curl -sL https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/SKILL.md \
+  > ~/.config/opencode/skills/skill-creator/SKILL.md
+
+# Download references
+curl -sL https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/references/installation-guide.md \
+  > ~/.config/opencode/skills/skill-creator/references/installation-guide.md
+
+curl -sL https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/references/troubleshooting.md \
+  > ~/.config/opencode/skills/skill-creator/references/troubleshooting.md
+
+curl -sL https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/references/claude-adaptation.md \
+  > ~/.config/opencode/skills/skill-creator/references/claude-adaptation.md
+
+# Download templates
+curl -sL https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/references/templates/basic-skill.md \
+  > ~/.config/opencode/skills/skill-creator/references/templates/basic-skill.md
+
+curl -sL https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/references/templates/full-skill.md \
+  > ~/.config/opencode/skills/skill-creator/references/templates/full-skill.md
+
+# Verify installation
+ls -la ~/.config/opencode/skills/skill-creator/
 ```
 
-## 3) Install a third-party skill (optional, user-selected)
+## Install Third-Party Skills
 
-Use the installer tool and pass the GitHub tree URL you want.
+Once skill-creator is installed, give your agent any skill URL:
+
+```
+Install the skill from https://github.com/anthropics/skills/tree/main/skills/pdf
+```
+
+Your agent will handle the installation.
+
+## Uninstall
+
+To remove a skill:
 
 ```bash
-# Example URL only. You must choose your own URL.
-python3 ./scripts/install-skill-from-github.py \
-  --url "https://github.com/OWNER/REPO/tree/BRANCH/path/to/skill" \
-  --scope local
+# Remove skill-creator
+rm -rf ~/.config/opencode/skills/skill-creator/
+
+# Remove any other skill
+rm -rf ~/.config/opencode/skills/<skill-name>/
 ```
 
-If installing to global scope, use `--scope global`.
+## Installation Paths
 
-## 4) Uninstall
+- **Local**: `./.opencode/skills/<name>/` (current project only)
+- **Global**: `~/.config/opencode/skills/<name>/` (all projects)
+
+## Verification
+
+Check that the skill is properly installed:
 
 ```bash
-# Uninstall this project's skill-creator (local)
-./scripts/uninstall-skill.sh --skill-name skill-creator --scope local --yes
+# Check SKILL.md exists
+ls ~/.config/opencode/skills/skill-creator/SKILL.md
 
-# Uninstall this project's skill-creator (global)
-./scripts/uninstall-skill.sh --skill-name skill-creator --scope global --yes
+# Check frontmatter
+head -5 ~/.config/opencode/skills/skill-creator/SKILL.md
 
-# Uninstall any installed third-party skill
-./scripts/uninstall-skill.sh --skill-name YOUR_SKILL_NAME --scope local --yes
+# List all installed skills
+ls ~/.config/opencode/skills/
 ```
-
-## Notes
-
-- Local path: `./.opencode/skills/<name>/`
-- Global path: `~/.config/opencode/skills/<name>/`
-- Installer writes `.install-manifest.json` in installed skill directory
