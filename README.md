@@ -50,15 +50,6 @@ Uninstall skill-creator
 
 Your agent will remove the skill-creator directory from your skills folder.
 
-### Install Other Skills
-
-Once skill-creator is installed, you can install any skill from GitHub:
-
-```
-Install the skill from https://github.com/anthropics/skills/tree/main/skills/pptx
-```
-
-Your agent will handle the download and installation.
 
 ## Documentation
 
