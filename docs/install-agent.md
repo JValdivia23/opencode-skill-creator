@@ -8,14 +8,20 @@ Never claim a skill is installed unless files were actually downloaded and valid
 
 ## Quick Installation (Copy-Paste This)
 
-For agents reading this file, install the skill-creator by reading its SKILL.md:
+For agents reading this file, install skill-creator by downloading these files:
 
 ```
-Read https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/SKILL.md
-Follow the installation instructions in the SKILL.md to download all required files to the target directory:
-  - Local: .opencode/skills/skill-creator/
-  - Global: ~/.config/opencode/skills/skill-creator/
-After downloading, validate by checking that SKILL.md exists and has valid frontmatter with 'name' and 'description' fields.
+Create directory ~/.config/opencode/skills/skill-creator/references/templates/
+
+Download these files:
+1. https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/SKILL.md
+2. https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/references/installation-guide.md
+3. https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/references/troubleshooting.md
+4. https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/references/claude-adaptation.md
+5. https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/references/templates/basic-skill.md
+6. https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/references/templates/full-skill.md
+
+Validate by checking that SKILL.md exists and has valid frontmatter with 'name' and 'description' fields.
 Report success with the installation path and file count.
 ```
 
@@ -24,19 +30,6 @@ Report success with the installation path and file count.
 - Examples in docs are examples only.
 - Do not auto-install sample skills unless the user explicitly asked for that specific skill URL.
 - The user decides which skill to install.
-
-## Files to Download
-
-When installing skill-creator, download these files:
-
-1. SKILL.md
-2. references/installation-guide.md
-3. references/troubleshooting.md
-4. references/claude-adaptation.md
-5. references/templates/basic-skill.md
-6. references/templates/full-skill.md
-
-Base URL: `https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/`
 
 ## Required Success Report Format
 
