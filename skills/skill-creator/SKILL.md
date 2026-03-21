@@ -1,6 +1,7 @@
 ---
 name: skill-creator
 description: Install, manage, and create OpenCode skills. Use this when the user wants to install a skill from GitHub (especially Claude's skills repository), set up a new skill locally, modify an existing skill, or troubleshoot skill loading issues. This skill guides proper installation, validation, and Claude-to-OpenCode adaptation.
+version: 1.0.0
 ---
 
 # Skill Creator
@@ -318,6 +319,24 @@ echo "Moved skill-name to global"
 | Validate skill | Run validation checklist above |
 | List skills | `ls ~/.config/opencode/skills/` |
 | Remove skill | `rm -rf ~/.config/opencode/skills/NAME` |
+
+## Version Management
+
+### Check for Updates
+
+```bash
+# Get installed version
+grep "^version:" ~/.config/opencode/skills/skill-creator/SKILL.md | sed 's/version: //'
+
+# Get latest version from GitHub
+curl -sL https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/SKILL.md | grep "^version:" | sed 's/version: //'
+```
+
+If no version is found in the installed skill, it can still be updated by re-downloading all files.
+
+### Update skill-creator
+
+Re-download all files from the source URL to update to the latest version.
 
 ## Next Steps
 
