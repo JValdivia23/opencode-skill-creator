@@ -9,7 +9,7 @@ Install and manage OpenCode skills from GitHub. Just find your skill, give the l
 Copy-paste this to your AI agent:
 
 ```
-Install skill-creator from https://github.com/JValdivia23/opencode-skill-creator by reading @docs/install-agent.md
+Install skill-creator from https://github.com/JValdivia23/opencode-skill-creator by reading https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/docs/install-agent.md
 ```
 
 ## Install Any Skill
