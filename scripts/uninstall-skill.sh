@@ -1,29 +1,34 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
+#
+# Uninstall an OpenCode skill
+# Usage: ./uninstall-skill.sh --skill-name NAME [--scope local|global] [--yes]
+#
 
-SKILL_NAME=""
+set -e
+
+# Default values
 SCOPE="local"
-DEST_ROOT=""
-YES="false"
+YES=false
 
+# Show usage
 usage() {
-  cat <<'EOF'
+  cat << 'EOF'
 Uninstall an OpenCode skill by deleting its directory.
 
 Usage:
-  scripts/uninstall-skill.sh --skill-name NAME [--scope local|global] [--dest-root PATH] [--yes]
+  ./uninstall-skill.sh --skill-name NAME [--scope local|global] [--yes]
 
 Options:
   --skill-name  Required. Skill directory name to remove.
-  --scope       Scope for default path resolution (default: local)
-  --dest-root   Optional root folder override. Final path is <dest-root>/<skill-name>
+  --scope       Scope: local (project) or global (user) (default: local)
   --yes         Do not prompt for confirmation
   -h, --help    Show this help
 EOF
 }
 
+# Parse arguments
 while [[ $# -gt 0 ]]; do
-  case "$1" in
+  case $1 in
     --skill-name)
       SKILL_NAME="$2"
       shift 2
@@ -32,12 +37,8 @@ while [[ $# -gt 0 ]]; do
       SCOPE="$2"
       shift 2
       ;;
-    --dest-root)
-      DEST_ROOT="$2"
-      shift 2
-      ;;
     --yes)
-      YES="true"
+      YES=true
       shift
       ;;
     -h|--help)
@@ -45,49 +46,62 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     *)
-      echo "[ERROR] Unknown argument: $1" >&2
+      echo "Unknown option: $1" >&2
       usage
-      exit 2
+      exit 1
       ;;
   esac
 done
 
-if [[ -z "${SKILL_NAME}" ]]; then
-  echo "[ERROR] --skill-name is required" >&2
+# Validate
+if [[ -z "$SKILL_NAME" ]]; then
+  echo "Error: --skill-name is required" >&2
   usage
-  exit 2
+  exit 1
 fi
 
-if [[ "${SCOPE}" != "local" && "${SCOPE}" != "global" ]]; then
-  echo "[ERROR] --scope must be 'local' or 'global'" >&2
-  exit 2
+if [[ "$SCOPE" != "local" && "$SCOPE" != "global" ]]; then
+  echo "Error: --scope must be 'local' or 'global'" >&2
+  exit 1
 fi
 
-if [[ -n "${DEST_ROOT}" ]]; then
-  DEST_PATH="$(python3 -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]).expanduser().resolve())' "${DEST_ROOT}")/${SKILL_NAME}"
-elif [[ "${SCOPE}" == "global" ]]; then
-  DEST_PATH="${HOME}/.config/opencode/skills/${SKILL_NAME}"
+# Determine install path
+if [[ "$SCOPE" == "global" ]]; then
+  INSTALL_DIR="$HOME/.config/opencode/skills/$SKILL_NAME"
 else
-  DEST_PATH="$(pwd)/.opencode/skills/${SKILL_NAME}"
+  INSTALL_DIR="./.opencode/skills/$SKILL_NAME"
 fi
 
-if [[ ! -e "${DEST_PATH}" ]]; then
-  echo "Nothing to uninstall. Path does not exist: ${DEST_PATH}"
+echo "== OpenCode Skill Uninstaller =="
+echo "Skill: $SKILL_NAME"
+echo "Scope: $SCOPE"
+echo "Path: $INSTALL_DIR"
+
+# Check if installed
+if [[ ! -d "$INSTALL_DIR" ]]; then
+  echo "Nothing to uninstall. Skill not found at $INSTALL_DIR"
   exit 0
 fi
 
-echo "Skill uninstall target: ${DEST_PATH}"
-if [[ "${YES}" != "true" ]]; then
-  read -r -p "Delete this directory recursively? [y/N] " answer
-  case "${answer}" in
-    y|Y|yes|YES)
-      ;;
-    *)
-      echo "Aborted."
-      exit 1
-      ;;
-  esac
+# Show files that will be removed
+echo ""
+echo "Files to be removed:"
+find "$INSTALL_DIR" -type f 2>/dev/null | sed "s|$INSTALL_DIR/|  - |" || echo "  (empty directory)"
+
+# Confirm
+if [[ "$YES" != "true" ]]; then
+  echo ""
+  read -r -p "Delete this directory? [y/N] " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Aborted."
+    exit 1
+  fi
 fi
 
-rm -rf "${DEST_PATH}"
-echo "Uninstalled: ${DEST_PATH}"
+# Remove
+rm -rf "$INSTALL_DIR"
+
+echo ""
+echo "== Uninstall Complete =="
+echo "Removed: $INSTALL_DIR"

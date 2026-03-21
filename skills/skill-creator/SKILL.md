@@ -280,83 +280,6 @@ echo "=== Project-Local Skills ==="
 ls -1 .opencode/skills/ 2>/dev/null || echo "No local skills"
 ```
 
-**With Version Information** (using the list-skills script):
-
-```bash
-# Show all installed skills with version info
-python3 scripts/list-skills.py
-
-# Show only global skills
-python3 scripts/list-skills.py --scope global
-
-# Show only local skills
-python3 scripts/list-skills.py --scope local
-
-# Output as JSON for scripting
-python3 scripts/list-skills.py --json
-```
-
-### Check for Updates
-
-```bash
-# Check if a skill has updates available (dry run)
-python3 scripts/update-skill.py --skill-name pdf --scope global --check-only
-
-# Output:
-# Skill:          pdf
-# Install path:   /home/user/.config/opencode/skills/pdf
-# Source:         anthropics/skills@main/skills/pdf
-# Installed SHA:  abc123def456...
-# Latest SHA:     xyz789ghi012...
-# Status:         UPDATE AVAILABLE
-```
-
-### Update a Skill
-
-```bash
-# Update a skill to the latest version
-python3 scripts/update-skill.py --skill-name pdf --scope global
-
-# Force re-download even if no changes detected
-python3 scripts/update-skill.py --skill-name pdf --scope global --force
-
-# Update a project-local skill
-python3 scripts/update-skill.py --skill-name my-custom --scope local
-```
-
-**What happens during an update**:
-1. Reads the install manifest (`.install-manifest.json`)
-2. Checks GitHub API for the latest commit SHA
-3. Compares installed commit SHA vs latest
-4. If newer version exists:
-   - Creates backup of current installation
-   - Downloads all files from GitHub
-   - Validates the new installation
-   - Updates the manifest with new commit SHA
-   - Removes backup on success, restores on failure
-
-### Update All Skills
-
-```bash
-# Update all globally installed skills
-for skill_dir in ~/.config/opencode/skills/*/; do
-  skill_name=$(basename "$skill_dir")
-  if [ -f "$skill_dir/.install-manifest.json" ]; then
-    echo "Updating $skill_name..."
-    python3 scripts/update-skill.py --skill-name "$skill_name" --scope global
-  fi
-done
-
-# Update all project-local skills
-for skill_dir in .opencode/skills/*/; do
-  skill_name=$(basename "$skill_dir")
-  if [ -f "$skill_dir/.install-manifest.json" ]; then
-    echo "Updating $skill_name..."
-    python3 scripts/update-skill.py --skill-name "$skill_name" --scope local
-  fi
-done
-```
-
 ### Remove a Skill
 
 ```bash
@@ -388,44 +311,13 @@ echo "Moved skill-name to global"
 
 | Task | Command |
 |------|---------|
-| Install from GitHub | `python3 scripts/install-skill-from-github.py --url "..." --scope local` |
-| List skills | `python3 scripts/list-skills.py` |
-| List skills (short) | `python3 scripts/list-skills.py --short` |
-| Check for updates | `python3 scripts/update-skill.py --skill-name NAME --check-only` |
-| Update a skill | `python3 scripts/update-skill.py --skill-name NAME` |
-| Update (force) | `python3 scripts/update-skill.py --skill-name NAME --force` |
-| Validate skill | `python3 scripts/validate-skill.py "<path>"` |
-| Uninstall skill | `./scripts/uninstall-skill.sh --skill-name NAME --yes` |
+| Install from Claude | See Method 1 above |
+| Install from GitHub | See Method 2 above |
 | Create basic skill | Copy `templates/basic-skill.md` |
 | Create full skill | Copy `templates/full-skill.md` |
-
-## Install Manifest
-
-Skills installed with `install-skill-from-github.py` include a `.install-manifest.json` file:
-
-```json
-{
-  "installed_at": "2024-01-15T10:30:00+00:00",
-  "source_url": "https://github.com/anthropics/skills/tree/main/skills/pdf",
-  "source": {
-    "owner": "anthropics",
-    "repo": "skills",
-    "branch": "main",
-    "path": "skills/pdf"
-  },
-  "scope": "global",
-  "skill_name": "pdf",
-  "install_path": "/home/user/.config/opencode/skills/pdf",
-  "commit_sha": "abc123def456789...",
-  "files": ["SKILL.md", "reference.md", "scripts/pdf_utils.py"]
-}
-```
-
-This manifest enables:
-- **Version tracking** via `commit_sha`
-- **Update detection** by comparing installed vs latest SHA
-- **Source provenance** to know where the skill came from
-- **File audit** to see what was installed
+| Validate skill | Run validation checklist above |
+| List skills | `ls ~/.config/opencode/skills/` |
+| Remove skill | `rm -rf ~/.config/opencode/skills/NAME` |
 
 ## Next Steps
 

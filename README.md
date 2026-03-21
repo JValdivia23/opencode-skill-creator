@@ -2,11 +2,11 @@
 
 Install and manage OpenCode skills from GitHub. Just find your skill, give the link to your agent and sip your coffee.
 
-Important: this project does **not** auto-install third-party skills by itself. You decide which skills to install, when to install them, and where to install them.
+**Important:** You decide which skills to install. This toolkit doesn't auto-install anything.
 
-## Quick Install (AI Agents)
+## Install skill-creator
 
-Copy-paste this to install skill-creator:
+Copy-paste this to your AI agent:
 
 ```
 Install skill-creator from https://github.com/JValdivia23/opencode-skill-creator by reading @docs/install-agent.md
@@ -14,7 +14,7 @@ Install skill-creator from https://github.com/JValdivia23/opencode-skill-creator
 
 ## Install Any Skill
 
-Found a skill on GitHub? Just give your agent the URL:
+Found a skill? Give your agent the URL:
 
 ```
 Install the skill from https://github.com/anthropics/skills/tree/main/skills/pptx
@@ -22,21 +22,17 @@ Install the skill from https://github.com/anthropics/skills/tree/main/skills/ppt
 
 Your agent (with skill-creator installed) will handle the rest.
 
-## Update a Skill
+## Manage Skills
 
-Check for updates or force re-download:
+All operations are agent-driven:
 
 ```
 Check for updates for skill pptx
 ```
 
 ```
-Update skill pptx to the latest version
+Update skill pptx
 ```
-
-## Uninstall a Skill
-
-Remove a skill you no longer need:
 
 ```
 Uninstall skill pptx

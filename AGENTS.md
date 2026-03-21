@@ -2,6 +2,7 @@
 
 This repository is a skill for Opencode so the agents know how to install other skills from GitHub. The user should find the skill that wants and just provide the link the the agent and the agent should know (based on the instructions of this skill) how to install and test the skill properly.
 
+I have a functional skill-creator already installed in my opencode, so the core files at /skill-creator/ should remain the same, ask in case you think we should modify something in there. This repository is just to make that skill shareable with others.
 ## Think as a new user
 
 1. This repo will be at GitHub, so the files are not locally installed for the user.
@@ -16,7 +17,6 @@ This repository is a skill for Opencode so the agents know how to install other 
 opencode-skill-creator/
 ├── skills/skill-creator/       # The skill to install
 │   ├── SKILL.md                # Main skill definition (frontmatter + instructions)
-│   ├── manifest.yaml           # Skill manifest (deterministic installation)
 │   └── references/             # Supporting documentation
 │       ├── installation-guide.md
 │       ├── claude-adaptation.md
