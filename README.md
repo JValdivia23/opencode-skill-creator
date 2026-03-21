@@ -22,21 +22,43 @@ Install the skill from https://github.com/anthropics/skills/tree/main/skills/ppt
 
 Your agent (with skill-creator installed) will handle the rest.
 
-## Manage Skills
+## Manage skill-creator
 
 All operations are agent-driven:
 
-```
-Check for updates for skill pptx
-```
+### Check for Updates
 
 ```
-Update skill pptx
+Check for updates for skill-creator
 ```
 
+Your agent will compare your installed version with the latest on GitHub.
+
+### Update skill-creator
+
 ```
-Uninstall skill pptx
+Update skill-creator to the latest version
 ```
+
+Your agent will re-download all files from GitHub to update to the latest version.
+
+### Uninstall skill-creator
+
+```
+Uninstall skill-creator
+```
+
+Your agent will remove the skill-creator directory from your skills folder.
+
+### Install Other Skills
+
+Once skill-creator is installed, you can install any skill from GitHub:
+
+```
+Install the skill from https://github.com/anthropics/skills/tree/main/skills/pptx
+```
+
+Your agent will handle the download and installation.
 
 ## Documentation
 
