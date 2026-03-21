@@ -1,36 +1,33 @@
-# AGENTS.md
+# Instructions for opencode-skill-creator
 
-Operational rules for agents working in this repository.
+This repository is a skill for Opencode so the agents know how to install other skills from GitHub. The user should find the skill that wants and just provide the link the the agent and the agent should know (based on the instructions of this skill) how to install and test the skill properly.
 
-## Intent
+## Think as a new user
 
-This repository provides installation tooling and guidance. It is not a directive to auto-install all sample skills.
+1. This repo will be at GitHub, so the files are not locally installed for the user.
+2. We want the user to install this repo easily with the minimum human intervention.
+3. The user should be able to just copy a prompt to an agent in Opencode and the agent should know how to install the skill properly from the web.
+4. If the user is not happy about the project, they should easily find a way to uninstall or update to the last version without cloning the whole project.
 
-## Mandatory Rules
+## NOTE: Every time you make a change that modify the project structure update the AGENTS..md
+## Project Structure
 
-1. Never claim installation succeeded without file-level verification.
-2. Never treat README/doc examples as already installed skills.
-3. Only install skills explicitly requested by user.
-4. Always validate installed skill directory before success message.
-5. Report exact install path and installed file list.
+```
+opencode-skill-creator/
+├── skills/skill-creator/       # The skill to install
+│   ├── SKILL.md                # Main skill definition (frontmatter + instructions)
+│   ├── manifest.yaml           # Skill manifest (deterministic installation)
+│   └── references/             # Supporting documentation
+│       ├── installation-guide.md
+│       ├── claude-adaptation.md
+│       ├── troubleshooting.md
+│       └── templates/
+│           ├── basic-skill.md
+│           └── full-skill.md
+```
 
-## Use These Scripts
+## Installation Paths for an OpenCode skill
 
-- Install this repo's skill:
-  - `./scripts/install-skill-creator.sh --scope local --force`
-- Install third-party skill by URL:
-  - `python3 ./scripts/install-skill-from-github.py --url "..." --scope local`
-- List installed skills:
-  - `python3 ./scripts/list-skills.py`
-- Check for updates:
-  - `python3 ./scripts/update-skill.py --skill-name <name> --check-only`
-- Update a skill:
-  - `python3 ./scripts/update-skill.py --skill-name <name>`
-- Validate:
-  - `python3 ./scripts/validate-skill.py "<path>"`
-- Uninstall:
-  - `./scripts/uninstall-skill.sh --skill-name <name> --scope local --yes`
+- **Local**: `./.opencode/skills/<skill-name>/` (current project only)
+- **Global**: `~/.config/opencode/skills/<skill-name>/` (all projects)
 
-## Failure Handling
-
-If installation fails, do not continue with partial assumptions. Report failure, reason, and next fix.

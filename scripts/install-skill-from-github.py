@@ -54,6 +54,69 @@ def parse_github_tree_url(url: str) -> Tuple[str, str, str, str]:
     return owner, repo, branch, source_path
 
 
+def build_raw_url(owner: str, repo: str, branch: str, path: str) -> str:
+    """Build a raw.githubusercontent.com URL for a file."""
+    encoded_path = urllib.parse.quote(path, safe="/")
+    return f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{encoded_path}"
+
+
+def try_load_manifest(
+    owner: str,
+    repo: str,
+    branch: str,
+    source_path: str,
+    token: Optional[str],
+) -> Optional[Dict]:
+    """Try to load manifest.yaml from the skill directory. Returns None if not found."""
+    manifest_path = f"{source_path}/manifest.yaml"
+    raw_url = build_raw_url(owner, repo, branch, manifest_path)
+
+    try:
+        content = _http_get_bytes(raw_url, token)
+        import yaml
+
+        manifest = yaml.safe_load(content.decode("utf-8"))
+        if isinstance(manifest, dict):
+            return manifest
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            return None
+        raise
+    except Exception:
+        return None
+    return None
+
+
+def get_files_from_manifest(
+    manifest: Dict,
+    owner: str,
+    repo: str,
+    branch: str,
+    source_path: str,
+) -> List[Tuple[str, str]]:
+    """Extract file list from manifest. Returns list of (relative_path, download_url)."""
+    files: List[Tuple[str, str]] = []
+
+    source = manifest.get("source", {})
+    base_url = source.get("base_url")
+    manifest_files = source.get("files", [])
+
+    # If manifest has explicit base_url and files, use them
+    if base_url and manifest_files:
+        for file_path in manifest_files:
+            rel_path = pathlib.PurePosixPath(file_path)
+            download_url = f"{base_url}/{file_path}"
+            files.append((rel_path.as_posix(), download_url))
+    else:
+        # Fallback: construct URLs from source_path
+        for file_path in manifest_files:
+            full_path = f"{source_path}/{file_path}"
+            download_url = build_raw_url(owner, repo, branch, full_path)
+            files.append((file_path, download_url))
+
+    return files
+
+
 def _http_get_json(url: str, token: Optional[str]) -> object:
     headers = {
         "Accept": "application/vnd.github+json",
@@ -275,7 +338,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--skill-name",
         default=None,
-        help="Override target skill name (default: basename of URL path)",
+        help="Override target skill name (default: basename of URL path or from manifest)",
     )
     p.add_argument(
         "--dest-root",
@@ -296,6 +359,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--github-token-env",
         default="GITHUB_TOKEN",
         help="Environment variable name containing GitHub token (optional)",
+    )
+    p.add_argument(
+        "--use-manifest",
+        action="store_true",
+        default=True,
+        help="Use manifest.yaml if present for deterministic installation (default: True)",
+    )
+    p.add_argument(
+        "--no-use-manifest",
+        dest="use_manifest",
+        action="store_false",
+        help="Disable manifest-based installation, always use API discovery",
     )
     return p
 
@@ -330,17 +405,47 @@ def main() -> int:
     print(f"Install path:   {install_path}")
     print(f"Skill name:     {skill_name}")
 
-    try:
-        files = list_github_files_recursive(owner, repo, branch, source_path, token)
-    except urllib.error.HTTPError as exc:
-        eprint(f"[ERROR] GitHub API request failed: HTTP {exc.code} {exc.reason}")
-        return 1
-    except urllib.error.URLError as exc:
-        eprint(f"[ERROR] Network error while contacting GitHub: {exc.reason}")
-        return 1
-    except Exception as exc:
-        eprint(f"[ERROR] Failed to list repository files: {exc}")
-        return 1
+    # Try to use manifest for deterministic installation
+    files: List[Tuple[str, str]] = []
+    manifest: Optional[Dict] = None
+    used_manifest = False
+
+    if args.use_manifest:
+        try:
+            manifest = try_load_manifest(owner, repo, branch, source_path, token)
+            if manifest:
+                used_manifest = True
+                print("[INFO] Found manifest.yaml - using deterministic installation")
+                files = get_files_from_manifest(
+                    manifest, owner, repo, branch, source_path
+                )
+
+                # Override skill name from manifest if not explicitly provided
+                if args.skill_name is None and "skill" in manifest:
+                    manifest_name = manifest["skill"].get("name")
+                    if manifest_name:
+                        skill_name = manifest_name
+                        install_path = compute_install_path(
+                            args.scope, skill_name, args.dest_root
+                        )
+                        print(f"[INFO] Using skill name from manifest: {skill_name}")
+                        print(f"[INFO] Updated install path: {install_path}")
+        except Exception as exc:
+            eprint(f"[WARN] Failed to load manifest: {exc}")
+
+    # Fallback to API discovery if no manifest or manifest disabled
+    if not files:
+        try:
+            files = list_github_files_recursive(owner, repo, branch, source_path, token)
+        except urllib.error.HTTPError as exc:
+            eprint(f"[ERROR] GitHub API request failed: HTTP {exc.code} {exc.reason}")
+            return 1
+        except urllib.error.URLError as exc:
+            eprint(f"[ERROR] Network error while contacting GitHub: {exc.reason}")
+            return 1
+        except Exception as exc:
+            eprint(f"[ERROR] Failed to list repository files: {exc}")
+            return 1
 
     if not files:
         eprint(
@@ -356,7 +461,10 @@ def main() -> int:
     except Exception:
         pass
 
-    print(f"Files discovered: {len(files)}")
+    if used_manifest:
+        print(f"Files from manifest: {len(files)}")
+    else:
+        print(f"Files discovered: {len(files)}")
     for rel, _ in files:
         print(f"  - {rel}")
 
@@ -394,7 +502,7 @@ def main() -> int:
         dest_file.write_bytes(content)
         downloaded.append(rel)
 
-    manifest = {
+    install_manifest = {
         "installed_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "source_url": args.url,
         "source": {
@@ -407,11 +515,12 @@ def main() -> int:
         "skill_name": skill_name,
         "install_path": str(install_path),
         "files": downloaded,
+        "used_manifest": used_manifest,
     }
     if commit_sha:
-        manifest["commit_sha"] = commit_sha
+        install_manifest["commit_sha"] = commit_sha
     (install_path / ".install-manifest.json").write_text(
-        json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
+        json.dumps(install_manifest, indent=2) + "\n", encoding="utf-8"
     )
 
     errors = validate_skill_dir(install_path, expected_name=skill_name)
