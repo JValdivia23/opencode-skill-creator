@@ -35,6 +35,19 @@ python3 ./scripts/install-skill-from-github.py \
   --scope local
 ```
 
+## Installation for Your Agent
+
+Copy and paste this prompt into your AI agent (OpenCode, Claude, etc.) to have it install everything automatically:
+
+> Clone the repository https://github.com/JValdivia23/opencode-skill-creator.git into a temporary directory, then install the skill-creator skill globally using the install-skill-creator.sh script with --force flag. After installation, validate it works by running the doctor-skill.sh script, then clean up by removing the temporary clone directory. Report the installation path and confirmation that skill-creator is ready to use.
+
+**What the agent will do:**
+1. Clone the repo to a temp directory
+2. Run `./scripts/install-skill-creator.sh --scope global --force`
+3. Run `./scripts/doctor-skill.sh skill-creator --scope global` to verify
+4. Remove the temp directory
+5. Report success with the installation path
+
 ## List Installed Skills
 
 ```bash
