@@ -149,6 +149,72 @@ kc.stop_channels()
 PY
 ```
 
+## Validate Specific Notebook Cells in User Kernel (No Output Writeback)
+
+Use this mode when you need to confirm that specific cells run without errors in the user's current kernel session, but you do not want to write outputs into the notebook file.
+
+Required behavior:
+- Use the user's active kernel connection from `%connect_info`.
+- Select cells by 1-based code-cell position (count only code cells, skip markdown).
+- Execute selected cells in order in the same running kernel.
+- Fail fast on the first error and report cell position plus traceback.
+- Do not modify or save `.ipynb` in this validation mode.
+- Do not run `jupytext --sync` or `jupytext --update` unless the user asks for file updates.
+
+Example (set notebook path, connection file, and selected cell positions):
+
+```bash
+pip install nbformat jupyter-client
+python - <<'PY'
+import time
+import nbformat
+from jupyter_client import BlockingKernelClient
+
+notebook_path = "notebook.ipynb"
+connection_file = "KERNEL_CONNECTION_FILE.json"
+cells_to_run = [2, 5, 7]  # 1-based code-cell positions
+
+nb = nbformat.read(notebook_path, as_version=4)
+code_cells = [cell for cell in nb.cells if cell.get("cell_type") == "code"]
+
+selected = []
+for pos in cells_to_run:
+    if pos < 1 or pos > len(code_cells):
+        raise SystemExit(f"Invalid code-cell position: {pos}. Notebook has {len(code_cells)} code cells.")
+    selected.append((pos, code_cells[pos - 1].get("source", "")))
+
+kc = BlockingKernelClient(connection_file=connection_file)
+kc.load_connection_file()
+kc.start_channels()
+kc.wait_for_ready(timeout=10)
+
+def run_cell(position: int, source: str) -> None:
+    msg_id = kc.execute(source, stop_on_error=True, store_history=False)
+    deadline = time.time() + 60
+    while time.time() < deadline:
+        msg = kc.get_iopub_msg(timeout=1)
+        if msg.get("parent_header", {}).get("msg_id") != msg_id:
+            continue
+        msg_type = msg.get("msg_type")
+        content = msg.get("content", {})
+        if msg_type == "error":
+            traceback = "\n".join(content.get("traceback", []))
+            raise RuntimeError(f"Code-cell {position} failed:\n{traceback}")
+        if msg_type == "status" and content.get("execution_state") == "idle":
+            return
+    raise TimeoutError(f"Timed out waiting for code-cell {position} completion.")
+
+try:
+    for position, source in selected:
+        run_cell(position, source)
+        print(f"Code-cell {position}: OK")
+finally:
+    kc.stop_channels()
+
+print("Selected cells executed without kernel errors.")
+PY
+```
+
 ## Common Tasks
 
 | Task | Command |
@@ -156,6 +222,7 @@ PY
 | Pair script and notebook | `jupytext --set-formats ipynb,py script.py --sync` |
 | Sync paired files | `jupytext --sync script.py` |
 | Update inputs and keep outputs | `jupytext --update --to notebook script.py` |
+| Validate specific cells in active kernel | Use the validation snippet in `Validate Specific Notebook Cells in User Kernel (No Output Writeback)` |
 | One-shot `.py` to `.ipynb` | `jupytext --to notebook script.py` |
 | One-shot `.ipynb` to `.py` | `jupytext --to py notebook.ipynb` |
 | Fallback convert | `ipynb-py-convert script.py script.ipynb` |
