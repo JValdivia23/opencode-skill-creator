@@ -12,6 +12,16 @@ Copy-paste this to your AI agent:
 Install skill-creator from https://github.com/JValdivia23/opencode-skill-creator by reading https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/docs/install-agent.md
 ```
 
+## Install python-ipynb
+
+Copy-paste this to your AI agent:
+
+```
+Install python-ipynb from https://github.com/JValdivia23/opencode-skill-creator by reading https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/docs/install-agent-python-ipynb.md
+```
+
+This skill focuses on `.py`/`.ipynb` conversion and sync with `jupytext` as default, plus live-kernel execution guidance.
+
 ## Install Any Skill
 
 Found a skill? Give your agent the URL:
@@ -54,6 +64,7 @@ Your agent will remove the skill-creator directory from your skills folder.
 ## Documentation
 
 - [docs/install-agent.md](docs/install-agent.md) - Agent installation contract
+- [docs/install-agent-python-ipynb.md](docs/install-agent-python-ipynb.md) - Agent install contract for python-ipynb
 - [docs/install-human.md](docs/install-human.md) - Manual installation guide
 - [docs/troubleshooting.md](docs/troubleshooting.md) - Common issues
 

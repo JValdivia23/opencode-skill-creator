@@ -15,19 +15,27 @@ I have a functional skill-creator already installed in my opencode, so the core 
 
 ```
 opencode-skill-creator/
-├── skills/skill-creator/       # The skill to install
-│   ├── SKILL.md                # Main skill definition (frontmatter + instructions)
-│   └── references/             # Supporting documentation
-│       ├── installation-guide.md
-│       ├── claude-adaptation.md
-│       ├── troubleshooting.md
-│       └── templates/
-│           ├── basic-skill.md
-│           └── full-skill.md
+├── skills/
+│   ├── skill-creator/          # Existing shareable skill to install/manage other skills
+│   │   ├── SKILL.md            # Main skill definition (frontmatter + instructions)
+│   │   └── references/         # Supporting documentation
+│   │       ├── installation-guide.md
+│   │       ├── claude-adaptation.md
+│   │       ├── troubleshooting.md
+│   │       └── templates/
+│   │           ├── basic-skill.md
+│   │           └── full-skill.md
+│   └── python-ipynb/           # Shareable notebook conversion/sync skill
+│       └── SKILL.md
+├── docs/
+│   ├── install-agent.md
+│   ├── install-agent-python-ipynb.md
+│   ├── install-human.md
+│   ├── troubleshooting.md
+│   └── claude-compatibility.md
 ```
 
 ## Installation Paths for an OpenCode skill
 
 - **Local**: `./.opencode/skills/<skill-name>/` (current project only)
 - **Global**: `~/.config/opencode/skills/<skill-name>/` (all projects)
-
