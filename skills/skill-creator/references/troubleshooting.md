@@ -8,8 +8,9 @@ Common issues when installing or using OpenCode skills and their solutions.
 2. [Permission Errors](#permission-errors)
 3. [Validation Failures](#validation-failures)
 4. [Name Conflicts](#name-conflicts)
-5. [Claude-Specific Issues](#claude-specific-issues)
-6. [Loading Errors](#loading-errors)
+5. [Missing Runtime Requirements](#missing-runtime-requirements)
+6. [Claude-Specific Issues](#claude-specific-issues)
+7. [Loading Errors](#loading-errors)
 
 ---
 
@@ -215,6 +216,48 @@ sed -i '' 's/name: my-skill/name: my-skill-v2/' \
 mkdir -p .opencode/skills/my-skill
 curl ... > .opencode/skills/my-skill/SKILL.md
 ```
+
+---
+
+## Missing Runtime Requirements
+
+### Symptom
+Skill files install successfully, but using the skill fails because required libraries or tools are missing.
+
+### Required Agent Behavior
+
+During installation from GitHub, the agent must:
+1. Scan `SKILL.md` and available reference files for dependency/prerequisite instructions.
+2. Verify requirements when possible.
+3. Report result as **installed with warnings** if required dependencies are missing.
+4. List missing items and suggested install commands.
+
+### Quick Diagnostics
+
+```bash
+# Scan installed skill docs for dependency hints
+REQ_PATTERN="requirements?|prerequisites?|dependenc|pip install|python -m pip|npm install|pnpm add|yarn add|brew install|apt(-get)? install|conda install"
+
+for file in ~/.config/opencode/skills/my-skill/SKILL.md \
+            ~/.config/opencode/skills/my-skill/reference.md \
+            ~/.config/opencode/skills/my-skill/forms.md; do
+  [ -f "$file" ] || continue
+  echo "=== $(basename "$file") ==="
+  grep -Ein "$REQ_PATTERN" "$file" || echo "No requirement lines found"
+done
+
+# Example tool/package checks
+command -v python3 >/dev/null && echo "python3 OK" || echo "python3 missing"
+python3 -m pip show pypdf >/dev/null 2>&1 && echo "pypdf OK" || echo "pypdf missing"
+command -v tesseract >/dev/null && echo "tesseract OK" || echo "tesseract missing"
+```
+
+### Reporting Example
+
+- Status: **installed with warnings**
+- Missing requirement: `tesseract`
+- Suggested command (macOS): `brew install tesseract`
+- Suggested command (Ubuntu/Debian): `sudo apt-get install tesseract-ocr`
 
 ---
 

@@ -5,11 +5,12 @@ Complete workflows for installing OpenCode skills from various sources.
 ## Table of Contents
 
 1. [Pre-Installation Checklist](#pre-installation-checklist)
-2. [Installing from Claude's Repository](#installing-from-claudes-repository)
-3. [Installing from Arbitrary GitHub](#installing-from-arbitrary-github)
-4. [Installing from Local Files](#installing-from-local-files)
-5. [Post-Installation Verification](#post-installation-verification)
-6. [Handling Supplementary Files](#handling-supplementary-files)
+2. [Requirement Check Policy](#requirement-check-policy)
+3. [Installing from Claude's Repository](#installing-from-claudes-repository)
+4. [Installing from Arbitrary GitHub](#installing-from-arbitrary-github)
+5. [Installing from Local Files](#installing-from-local-files)
+6. [Post-Installation Verification](#post-installation-verification)
+7. [Handling Supplementary Files](#handling-supplementary-files)
 
 ---
 
@@ -64,6 +65,46 @@ touch "$HOME/.config/opencode/skills/.write_test" 2>/dev/null && \
 
 # Test local directory
 mkdir -p "./.opencode/skills" 2>/dev/null && echo "✓ Local directory writable" || echo "✗ Cannot write to local directory"
+```
+
+### 5. Requirement Discovery Plan (Before Final Success Report)
+
+Before declaring installation success, plan to inspect skill documentation for dependencies and prerequisites.
+
+Minimum files to scan (if present):
+- `SKILL.md`
+- `reference.md`
+- `forms.md`
+- `README*`
+
+---
+
+## Requirement Check Policy
+
+When installing a skill from GitHub, requirement checking is mandatory.
+
+### Required behavior
+
+1. Download `SKILL.md` first, then scan for requirement indicators in skill docs.
+2. Search for keywords: `requirements`, `prerequisites`, `dependencies`, `pip install`, `npm install`, `brew install`, `apt install`, `conda install`.
+3. Verify requirements when possible (examples):
+   - Command exists: `command -v <tool>`
+   - Python package exists: `python3 -m pip show <package>`
+   - Node CLI exists: `command -v <cli>`
+4. Do not auto-install missing dependencies unless user explicitly asks.
+5. If requirements are missing, report status as **installed with warnings**.
+6. Include requirement-check output in the success/failure report.
+
+### Suggested quick check block
+
+```bash
+REQ_PATTERN="requirements?|prerequisites?|dependenc|pip install|python -m pip|npm install|pnpm add|yarn add|brew install|apt(-get)? install|conda install"
+
+for file in "$INSTALL_PATH/SKILL.md" "$INSTALL_PATH/reference.md" "$INSTALL_PATH/forms.md"; do
+  [ -f "$file" ] || continue
+  echo "=== Requirement scan: $(basename "$file") ==="
+  grep -Ein "$REQ_PATTERN" "$file" || echo "No requirement lines found"
+done
 ```
 
 ---

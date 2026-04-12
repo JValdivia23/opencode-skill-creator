@@ -22,6 +22,7 @@ Download these files:
 6. https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/skill-creator/references/templates/full-skill.md
 
 Validate by checking that SKILL.md exists and has valid frontmatter with 'name' and 'description' fields.
+If the installed skill is later used to install third-party skills from GitHub, the agent must scan the target skill docs for prerequisites/dependencies and verify what it can. Missing dependencies should be reported as installed with warnings.
 Report success with the installation path and file count.
 ```
 
@@ -39,6 +40,7 @@ After install, report:
 - Destination path
 - Complete installed file list
 - Validation status
+- Requirement Check status (for target skill installs): Found / Verified / Missing / Not checked
 - Warnings (Claude/OpenCode compatibility notes)
 
 ## Required Failure Report Format

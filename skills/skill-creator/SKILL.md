@@ -1,7 +1,7 @@
 ---
 name: skill-creator
 description: Install, manage, and create OpenCode skills. Use this when the user wants to install a skill from GitHub (especially Claude's skills repository), set up a new skill locally, modify an existing skill, or troubleshoot skill loading issues. This skill guides proper installation, validation, and Claude-to-OpenCode adaptation.
-version: 1.0.0
+version: 1.0.1
 ---
 
 # Skill Creator
@@ -13,6 +13,7 @@ A comprehensive guide for installing, managing, and creating OpenCode skills.
 - **Install skills** from GitHub repositories (especially Claude's skills)
 - **Create new skills** from templates
 - **Validate** skill structure and frontmatter
+- **Check and report requirements** for each target skill during installation
 - **Adapt** Claude skills for OpenCode compatibility
 - **Manage** installed skills (list, update, remove)
 - **Troubleshoot** skill loading issues
@@ -61,6 +62,22 @@ cp ~/.config/opencode/skills/skill-creator/references/templates/basic-skill.md \
 # Edit and customize
 ```
 
+## Requirement Check Policy (Mandatory for GitHub Installs)
+
+When installing any third-party skill from GitHub, always perform a requirement check before reporting success.
+
+1. Download `SKILL.md` first, then scan for requirements in:
+   - `SKILL.md`
+   - `reference.md`, `forms.md`, `README*` (if present)
+2. Look for keywords such as: `requirements`, `prerequisites`, `dependencies`, `install`, `pip install`, `npm install`, `brew install`, `apt install`.
+3. Verify declared requirements when possible (examples):
+   - Command/tool exists: `command -v <tool>`
+   - Python package: `python3 -m pip show <package>`
+   - Node tooling: `command -v <cli>` or `npm list -g <package> --depth=0`
+4. Do **not** auto-install dependencies unless the user explicitly asks.
+5. If requirements are missing, report status as **installed with warnings** and list all missing items.
+6. Include a requirement-check summary in the final installation report.
+
 ## Installation Methods
 
 ### Method 1: From Claude's Skills Repository (Recommended)
@@ -106,7 +123,36 @@ echo "Installed files:"
 ls -la "$INSTALL_PATH/"
 ```
 
-**Step 3**: Validate the installation
+**Step 3**: Check skill requirements and dependencies
+
+```bash
+echo "Checking skill requirements..."
+REQ_FILES=(
+  "$INSTALL_PATH/SKILL.md"
+  "$INSTALL_PATH/reference.md"
+  "$INSTALL_PATH/forms.md"
+)
+REQ_PATTERN="requirements?|prerequisites?|dependenc|pip install|python -m pip|npm install|pnpm add|yarn add|brew install|apt(-get)? install|conda install"
+
+REQ_FOUND=0
+for file in "${REQ_FILES[@]}"; do
+  [ -f "$file" ] || continue
+  MATCHES=$(grep -Ein "$REQ_PATTERN" "$file" || true)
+  if [ -n "$MATCHES" ]; then
+    echo "Potential requirement lines in $(basename "$file"):"
+    echo "$MATCHES"
+    REQ_FOUND=1
+  fi
+done
+
+if [ "$REQ_FOUND" -eq 0 ]; then
+  echo "⚠ No explicit requirement section found. Continue with caution."
+else
+  echo "✓ Requirement-related lines found. Verify required tools/packages before final success report."
+fi
+```
+
+**Step 4**: Validate the installation
 
 ```bash
 # Check frontmatter
@@ -119,7 +165,7 @@ echo "Directory name: $SKILL_NAME"
 [ "$SKILL_FILE_NAME" = "$SKILL_NAME" ] && echo "✓ Names match" || echo "⚠ Names don't match!"
 ```
 
-**Step 4**: Check for Claude-specific content
+**Step 5**: Check for Claude-specific content
 
 ```bash
 # Search for potential Claude-specific references
@@ -314,6 +360,7 @@ echo "Moved skill-name to global"
 |------|---------|
 | Install from Claude | See Method 1 above |
 | Install from GitHub | See Method 2 above |
+| Check requirements | Scan docs + verify dependencies |
 | Create basic skill | Copy `templates/basic-skill.md` |
 | Create full skill | Copy `templates/full-skill.md` |
 | Validate skill | Run validation checklist above |
