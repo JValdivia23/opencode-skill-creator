@@ -1,19 +1,22 @@
 ---
 name: python-ipynb
-description: Convert and sync Python scripts and Jupyter notebooks with jupytext (default) and ipynb-py-convert (fallback), preserve notebook outputs, and attach to the user's active kernel for targeted execution. Use when users mention .ipynb, jupytext, ipynb-py-convert, or %connect_info.
-version: 1.0.0
+description: Convert and sync Python scripts and Jupyter notebooks with jupytext, preserve outputs, discover active kernels/servers, inspect live variables, edit notebook cells, and attach to the user's active kernel for targeted execution.
+version: 1.1.0
 ---
 
 # Python IPYNB
 
-Use this skill to keep `.py` and `.ipynb` aligned while preserving notebook outputs and executing tests in the user's kernel.
+Use this skill to keep `.py` and `.ipynb` aligned while preserving notebook outputs, discover running Jupyter infrastructure, introspect kernel state, edit notebook structure, and execute code in the user's active kernel.
 
 ## What I Do
 
 - Convert between `.py` and `.ipynb`
 - Prefer paired notebook workflows with `jupytext`
 - Preserve notebook outputs whenever possible
+- Discover running Jupyter servers and active kernel connections
 - Attach to an existing user kernel for targeted execution
+- Inspect live variables in a connected kernel
+- Insert, replace, and delete notebook cells programmatically
 - Handle separate tooling and runtime environments
 
 ## When to Use Me
@@ -23,10 +26,19 @@ Use this skill when:
 - The user asks for `jupytext`, `ipynb-py-convert`, or `pupytext` workflows
 - The user wants to run or test specific notebook code through an existing kernel
 - The user provides `%connect_info` output or asks to connect to a running kernel
+- The user wants to know what variables exist in their kernel
+- The user wants to edit notebook cells without opening the GUI
+- The user wants to discover what notebooks or kernels are currently running
 
 Do not use this skill when:
 - The task is unrelated to notebook or script conversion/sync
 - The user is asking for generic Python coding without notebook context
+
+## Prerequisites
+
+- `jupytext` for conversion workflows: `pip install jupytext`
+- `jupyter_client` and `nbformat` for kernel operations and cell editing: `pip install jupyter_client nbformat`
+- The helper script in this skill directory (relative to SKILL.md): `scripts/python_ipynb_tool.py`
 
 ## Kernel Selection Policy (Required)
 
@@ -42,6 +54,100 @@ Do not use this skill when:
 - Tooling environment: terminal/python environment used for conversion commands.
 - `jupytext` may exist only in the tooling environment; this is acceptable.
 - Keep conversion in the tooling environment and keep execution/testing in the user kernel.
+
+## Agent Helper Script
+
+This skill includes `scripts/python_ipynb_tool.py` to replace heavy inline boilerplate with single commands that return structured JSON. Use it for all kernel and notebook editing tasks.
+
+Set the script path once:
+
+```bash
+TOOL="$(dirname "$0")/scripts/python_ipynb_tool.py"
+# Or if running from the skill root:
+TOOL="./scripts/python_ipynb_tool.py"
+```
+
+All commands below output structured JSON. On success, the top-level `ok` field is `true`. On failure, `ok` is `false` and `error` contains details.
+
+## Discovery
+
+### Running Jupyter servers
+
+```bash
+python "$TOOL" discover-servers
+```
+
+Returns a list of URLs and notebook directories for currently running servers.
+
+### Active kernel connections
+
+```bash
+python "$TOOL" discover-kernels
+```
+
+Returns active kernel connection JSON files found in standard Jupyter runtime directories, including the kernel name. This eliminates the need for the user to manually locate `%connect_info` files.
+
+## Quick Kernel Execution
+
+### Execute code in a connected kernel
+
+```bash
+python "$TOOL" execute \
+  --connection /path/to/kernel-xxx.json \
+  --code "print('hello from kernel')" \
+  --timeout 30
+```
+
+Returns an `outputs` array with `stream`, `execute_result`, and `error` entries. This replaces the 20+ line inline `BlockingKernelClient` boilerplate.
+
+### Inspect live variables
+
+```bash
+python "$TOOL" variables \
+  --connection /path/to/kernel-xxx.json \
+  --timeout 10
+```
+
+Returns a `variables` array with `name`, `type`, and a truncated `repr` for each user-defined variable in the kernel namespace. This enables state-aware exploration without executing new code.
+
+## Structured Notebook Cell Editing
+
+All cell editing commands operate directly on the `.ipynb` file. If you are using a paired jupytext workflow, run `jupytext --sync` after editing to update the `.py` counterpart.
+
+### List cells
+
+```bash
+python "$TOOL" cells list --notebook notebook.ipynb
+```
+
+Returns cell `index`, `id`, `cell_type`, and a `source_preview`.
+
+### Insert a cell
+
+```bash
+python "$TOOL" cells insert \
+  --notebook notebook.ipynb \
+  --at-index 2 \
+  --cell-type code \
+  --source "import pandas as pd"
+```
+
+### Replace a cell's source
+
+```bash
+python "$TOOL" cells replace \
+  --notebook notebook.ipynb \
+  --cell-id <id-from-list> \
+  --source "df = pd.read_csv('data.csv')"
+```
+
+### Delete a cell
+
+```bash
+python "$TOOL" cells delete \
+  --notebook notebook.ipynb \
+  --cell-id <id-from-list>
+```
 
 ## Default Workflow (jupytext)
 
@@ -91,7 +197,9 @@ ipynb-py-convert script.py script.ipynb
 ipynb-py-convert notebook.ipynb notebook.py
 ```
 
-## Connect to User Kernel
+## Connect to User Kernel (Manual Pattern)
+
+For cases where the helper script is unavailable, the manual `BlockingKernelClient` pattern is preserved below.
 
 ### Human console pattern
 
@@ -149,7 +257,21 @@ kc.stop_channels()
 PY
 ```
 
-## Validate Specific Notebook Cells in User Kernel (No Output Writeback)
+## Validate Specific Notebook Cells in User Kernel
+
+### Using the helper script (recommended)
+
+```bash
+python "$TOOL" validate \
+  --notebook notebook.ipynb \
+  --connection /path/to/kernel-xxx.json \
+  --positions 2,5,7 \
+  --timeout 60
+```
+
+Returns per-cell status. Fails fast on the first error and reports the cell position plus traceback. Does not modify the notebook file.
+
+### Using inline Python (legacy)
 
 Use this mode when you need to confirm that specific cells run without errors in the user's current kernel session, but you do not want to write outputs into the notebook file.
 
@@ -222,14 +344,23 @@ PY
 | Pair script and notebook | `jupytext --set-formats ipynb,py script.py --sync` |
 | Sync paired files | `jupytext --sync script.py` |
 | Update inputs and keep outputs | `jupytext --update --to notebook script.py` |
-| Validate specific cells in active kernel | Use the validation snippet in `Validate Specific Notebook Cells in User Kernel (No Output Writeback)` |
+| Discover running servers | `python "$TOOL" discover-servers` |
+| Discover active kernels | `python "$TOOL" discover-kernels` |
+| Execute code in kernel | `python "$TOOL" execute --connection <file> --code "<py>"` |
+| List kernel variables | `python "$TOOL" variables --connection <file>` |
+| List notebook cells | `python "$TOOL" cells list --notebook <file>` |
+| Insert a cell | `python "$TOOL" cells insert --notebook <file> --at-index <n> --cell-type code --source "<py>"` |
+| Replace cell source | `python "$TOOL" cells replace --notebook <file> --cell-id <id> --source "<py>"` |
+| Delete a cell | `python "$TOOL" cells delete --notebook <file> --cell-id <id>` |
+| Validate cells in kernel | `python "$TOOL" validate --notebook <file> --connection <file> --positions 1,3` |
 | One-shot `.py` to `.ipynb` | `jupytext --to notebook script.py` |
 | One-shot `.ipynb` to `.py` | `jupytext --to py notebook.ipynb` |
 | Fallback convert | `ipynb-py-convert script.py script.ipynb` |
 
 ## Important Notes
 
-- Use `.py` as the editable source for agent-driven changes.
+- Use `.py` as the editable source for agent-driven changes when using jupytext pairs.
 - Run tests in the user-selected runtime kernel.
 - Keep conversion and execution concerns separated when environments differ.
 - If kernel is unknown for a first-time notebook, ask once, then proceed with that kernel.
+- Prefer the helper script for all kernel and cell-editing operations; it returns structured JSON and eliminates inline boilerplate.

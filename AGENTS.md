@@ -26,7 +26,9 @@ opencode-skill-creator/
 │   │           ├── basic-skill.md
 │   │           └── full-skill.md
 │   └── python-ipynb/           # Shareable notebook conversion/sync skill
-│       └── SKILL.md
+│       ├── SKILL.md            # Main skill definition
+│       └── scripts/
+│           └── python_ipynb_tool.py  # Agent helper for kernel ops and cell editing
 ├── docs/
 │   ├── install-agent.md
 │   ├── install-agent-python-ipynb.md
