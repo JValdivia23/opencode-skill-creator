@@ -25,13 +25,21 @@ opencode-skill-creator/
 │   │       └── templates/
 │   │           ├── basic-skill.md
 │   │           └── full-skill.md
-│   └── python-ipynb/           # Shareable notebook conversion/sync skill
+│   ├── python-ipynb/           # Shareable notebook conversion/sync skill
+│   │   ├── SKILL.md            # Main skill definition
+│   │   └── scripts/
+│   │       └── python_ipynb_tool.py  # Agent helper for kernel ops and cell editing
+│   └── zotero/                # Shareable Zotero workflow skill (add papers, convert PDFs, audit)
 │       ├── SKILL.md            # Main skill definition
-│       └── scripts/
-│           └── python_ipynb_tool.py  # Agent helper for kernel ops and cell editing
+│       ├── README.md           # Install + overview
+│       ├── LICENSE.txt         # MIT
+│       ├── scripts/            # setup.py, pdf2md.py, check_missing_raw.py, install_add_identifier.sh
+│       │   └── templates/      # zot-translation-server.sh, zot-add-identifier.py (used by install_add_identifier.sh)
+│       └── references/         # getting-started, zot-cheatsheet, add-by-identifier, configuration, pdf-path-resolution
 ├── docs/
 │   ├── install-agent.md
 │   ├── install-agent-python-ipynb.md
+│   ├── install-agent-zotero.md
 │   ├── install-human.md
 │   ├── troubleshooting.md
 │   └── claude-compatibility.md
