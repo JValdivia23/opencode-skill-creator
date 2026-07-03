@@ -22,6 +22,16 @@ Install python-ipynb from https://github.com/JValdivia23/opencode-skill-creator 
 
 This skill focuses on `.py`/`.ipynb` conversion and sync with `jupytext` as default, plus live-kernel execution guidance.
 
+## Install zotero
+
+Copy-paste this to your AI agent:
+
+```
+Install zotero from https://github.com/JValdivia23/opencode-skill-creator by reading https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/docs/install-agent-zotero.md
+```
+
+This skill adds papers to a local Zotero library by DOI/arXiv/ISBN/PMID, converts PDFs to Markdown, and audits which papers still need conversion.
+
 ## Install Any Skill
 
 Found a skill? Give your agent the URL:
@@ -65,6 +75,7 @@ Your agent will remove the skill-creator directory from your skills folder.
 
 - [docs/install-agent.md](docs/install-agent.md) - Agent installation contract
 - [docs/install-agent-python-ipynb.md](docs/install-agent-python-ipynb.md) - Agent install contract for python-ipynb
+- [docs/install-agent-zotero.md](docs/install-agent-zotero.md) - Agent install contract for zotero
 - [docs/install-human.md](docs/install-human.md) - Manual installation guide
 - [docs/troubleshooting.md](docs/troubleshooting.md) - Common issues
 
