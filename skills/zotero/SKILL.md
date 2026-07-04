@@ -1,7 +1,7 @@
 ---
 name: zotero
 description: "Add papers to a local Zotero library by DOI/arXiv/ISBN/PMID, read existing items, resolve PDF attachment paths, convert PDFs to Markdown, and audit which PDFs still need conversion. Use when the user mentions Zotero, papers, references, citations, DOIs, arXiv, or wants to stage a research library into Markdown."
-version: 1.0.1
+version: 1.0.2
 ---
 
 # Zotero
@@ -25,7 +25,7 @@ The first turn is the only turn that loads two files. After that, one file per t
 - **Add papers to Zotero by identifier** — DOI, arXiv ID/URL, ISBN, or PMID, with full metadata. Uses the native Zotero translator engine via `zot-add-identifier`, not bare `zot add --doi` (which creates empty stubs).
 - **Read Zotero metadata** — search, read item details, list recent items, find duplicates, dump library stats. The `zot` CLI is the single source of truth.
 - **Resolve a PDF's local path** — three approaches (SQLite, `zot open`, `find`) for the common case where the parent key differs from the storage key.
-- **Convert PDFs to Markdown (staging)** — `pymupdf4llm` only, no GPU, no extra services. Follows the staging workflow: `zot --json read <KEY>` for metadata → `python scripts/pdf2md.py <pdf> -o <Author_Year_Title>.md` → prepend YAML frontmatter. Produces one `Author_Year_Title.md` per paper, matching the audit's expected naming.
+- **Convert PDFs to Markdown (staging)** — one command: `python scripts/stage.py <KEY>`. Reads Zotero metadata, resolves the PDF, builds the YAML frontmatter, runs `pdf2md.py` for the body, and writes `Author_Year_Title.md` to the config's `output_dir`.
 - **Audit which Zotero PDFs are missing from your output dir** — four-section report (existing stubs, recent gaps, older gaps, missing-PDF-on-disk).
 
 ## When to Use Me
@@ -53,10 +53,8 @@ The first three commands a new user will run, in order. Assumes setup has alread
 # 1. Add a paper by DOI (full metadata, not a stub)
 zot-add-identifier "10.1023/A:1026553619983"
 
-# 2. Stage it to Markdown: metadata -> convert -> prepend frontmatter
-zot --json read <KEY>                                                # metadata + PDF path
-python scripts/pdf2md.py <pdf_path> -o "<AuthorLastName>_<Year>_<TitleSlug>.md"
-# then prepend YAML frontmatter (see "Converting a PDF to Markdown")
+# 2. Stage it to Markdown (frontmatter + body in one shot)
+python scripts/stage.py <KEY>
 
 # 3. Audit what's still missing
 python scripts/check_missing_raw.py
@@ -197,19 +195,28 @@ For the full guide — including the Zotero-desktop-locking workaround, what to 
 
 Conversion follows the **staging workflow**: resolve metadata from Zotero, convert the PDF body, then prepend structured YAML frontmatter. The result is one `Author_Year_Title.md` file in your output_dir, ready for Obsidian or a wiki ingest.
 
-### Staging steps (one paper)
+### One command
 
 ```bash
-# 1. Metadata + resolve the PDF path for a Zotero item
-zot --json read <KEY>
-
-# 2. Convert the PDF body, writing to the canonical Author_Year_Title name
-python scripts/pdf2md.py <pdf_path> -o "<AuthorLastName>_<Year>_<TitleSlug>.md"
-
-# 3. Prepend YAML frontmatter (built from the zot --json read output) to the .md
+python scripts/stage.py <KEY>                  # full staging: frontmatter + body
+python scripts/stage.py <KEY> --dry-run        # preview, no writes
+python scripts/stage.py <KEY> --force          # overwrite an existing .md
+python scripts/stage.py --schema               # print the frontmatter schema
+python scripts/stage.py --check <file.md>      # validate an existing .md
 ```
 
-`pdf2md.py` is a pure converter (pymupdf4llm); it does not query Zotero and does not emit frontmatter. The agent constructs the canonical filename and the frontmatter from `zot --json read <KEY>`, exactly as the project-local zotero staging workflow does. The `-o` path may be a bare stem — `pdf2md.py` writes it into the config's `output_dir`.
+`stage.py` runs `zot --json read <KEY>`, resolves the PDF via SQLite, builds the 14-field YAML frontmatter, runs `pdf2md.py` for the body, and writes `Author_Year_Title.md` to the config's `output_dir`. It validates the frontmatter round-trips (PyYAML, optional — skipped with a warning if absent). Use `--pdf <path>` to override PDF auto-resolution, `-o <path>` to override the output, `--no-frontmatter` for a raw convert.
+
+### Manual mode (PDF not in Zotero)
+
+For a local PDF with no Zotero item, `pdf2md.py` still works as a pure converter:
+
+```bash
+python scripts/pdf2md.py <pdf>                 # kebab-case slug, no frontmatter
+python scripts/pdf2md.py <pdf> -o out.md       # explicit output
+```
+
+Such files won't match the audit's `Author_Year_Title` convention — that's expected; the audit flags them as missing, prompting staging via `stage.py` once the paper is in Zotero.
 
 ### Canonical filename
 
@@ -229,24 +236,25 @@ Prepend this YAML block, sourcing each field from `zot --json read <KEY>`:
 ---
 title: "<data.title>"
 authors:                            # one entry per creator
-  - "<firstName lastName>"
+  - "<first_name last_name>"
 year: "<data.date, first 4 chars>"
 doi: "<data.doi>"
-abstract: "<data.abstractNote>"
+abstract: |                         # block scalar; omitted if empty
+  <data.abstract>
 tags: []                            # from data.tags
 collections:                        # from data.collections
   - "<collection key>"
 item_key: "<data.key>"
-item_type: "<data.itemType>"
+item_type: "<data.item_type>"
 source_url: "<data.url>"
 date: "<data.date>"
-date_added: "<data.dateAdded>"
-date_modified: "<data.dateModified>"
+date_added: "<data.date_added>"
+date_modified: "<data.date_modified>"
 pdf_path: "<resolved local PDF path>"
 ---
 ```
 
-Omit any field the Zotero item doesn't have. Resolve `pdf_path` via `references/pdf-path-resolution.md`.
+`stage.py` resolves `pdf_path` automatically via the SQLite query in `references/pdf-path-resolution.md`. The schema is also printable via `python scripts/stage.py --schema`.
 
 For scanned PDFs without native text, `pymupdf4llm` (the library `pdf2md.py` wraps) auto-engages Tesseract OCR. The tesseract binary must be on PATH (`brew install tesseract` / `apt-get install tesseract-ocr`). If output is suspiciously small (< 50 lines), it's likely a low-quality scan — see `references/configuration.md` for OCR troubleshooting.
 

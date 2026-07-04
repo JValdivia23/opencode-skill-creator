@@ -3,6 +3,13 @@
 The current version lives in `SKILL.md` frontmatter (`version:` field).
 This file holds the full version history — load it on demand, not every turn.
 
+## v1.0.2
+
+- Add `scripts/stage.py` — one-command staging tool that wraps the v1.0.1 3-step workflow: `zot --json read <KEY>` → resolve PDF via SQLite → build 14-field YAML frontmatter → run `pdf2md.py` for the body → write `Author_Year_Title.md` to `output_dir`. Supports `--dry-run`, `--pdf <path>`, `-o <path>`, `--no-frontmatter`, `--force`, `--schema`, `--check <file>`. Optional PyYAML for frontmatter round-trip validation (skipped with a warning if absent).
+- Extract the canonical `Author_Year_Title` slugger into `scripts/_config.py` (`_slugify_canonical`), shared by `stage.py` and `check_missing_raw.py` (now a thin delegate) so the writer and the audit cannot drift apart.
+- Fix the v1.0.1 frontmatter schema field names in `SKILL.md` to match the actual `zot --json read` JSON (`abstract` not `abstractNote`, `item_type` not `itemType`, `date_added`/`date_modified` not `dateAdded`/`dateModified`; creators use `first_name`/`last_name`).
+- `pdf2md.py` unchanged (pure converter); `check_missing_raw.py` behavior unchanged (strict `Author_Year` prefix match still enforces the standard).
+
 ## v1.0.1
 
 - Standardize md creation on the `Author_Year_Title` + YAML-frontmatter staging convention, matching the project-local zotero staging workflow. `SKILL.md` conversion section now mirrors staging: `zot --json read <KEY>` → `pdf2md.py -o <Author_Year_Title>.md` → prepend frontmatter (title, authors, year, doi, abstract, tags, collections, item_key, item_type, source_url, date, date_added, date_modified, pdf_path).

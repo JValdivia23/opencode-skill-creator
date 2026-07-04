@@ -10,6 +10,7 @@ are invoked from the repo root, from `scripts/`, or by absolute path.
 from __future__ import annotations
 
 import os
+import re
 import sys
 import tomllib
 from pathlib import Path
@@ -57,3 +58,25 @@ def output_dir() -> Path:
         except OSError as e:
             _die(f"cannot create output_dir {expanded}: {e}")
     return expanded
+
+
+def _slugify_canonical(author_last: str, year: str, title: str) -> str:
+    """Build the canonical Author_Year_Title... filename stem.
+
+    Shared by scripts/stage.py (which writes the file) and
+    scripts/check_missing_raw.py (which computes expectedStem), so a
+    file staged with this name is always recognized as converted by
+    the audit. The audit matches on the Author_Year prefix, so minor
+    title-slug variation is tolerated, but the full stem is identical
+    when both sides use this function.
+
+    - author_last: non-word chars stripped (Valdivia-Prado -> ValdiviaPrado)
+    - year: first 4 digits (???? -> "")
+    - title: first 12 words, punctuation stripped, joined by _, original case
+    """
+    author_part = re.sub(r"[^\w]", "", author_last)
+    year_part = re.sub(r"[^\d]", "", year)[:4]
+    title_clean = re.sub(r"[^\w\s]", "", title)
+    words = title_clean.split()[:12]
+    title_part = "_".join(words)
+    return f"{author_part}_{year_part}_{title_part}"

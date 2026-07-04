@@ -12,7 +12,7 @@ Copy-paste this to your AI agent:
 Install the zotero skill from https://github.com/JValdivia23/opencode-skill-creator by reading https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/docs/install-agent-zotero.md
 ```
 
-The install doc lists all 17 files to download (SKILL.md, README.md, LICENSE.txt, .gitignore, 4 scripts, 1 install script, 2 wrapper templates, 6 references).
+The install doc lists all 18 files to download (SKILL.md, README.md, LICENSE.txt, .gitignore, 5 scripts, 1 install script, 2 wrapper templates, 6 references).
 
 Or manually, in `~/.config/opencode/skills/zotero/`:
 
@@ -20,13 +20,14 @@ Or manually, in `~/.config/opencode/skills/zotero/`:
 mkdir -p ~/.config/opencode/skills/zotero/{scripts/templates,references}
 # Then download each file from:
 # https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/zotero/<filename>
-# where <filename> is each of the 17 files listed in docs/install-agent-zotero.md.
+# where <filename> is each of the 18 files listed in docs/install-agent-zotero.md.
 ```
 
 ## What you get
 
 - **`scripts/setup.py`** — first-run setup. Writes `~/.zotero-skill/config.toml` with your output directory. Re-runnable; `--check` flag for diagnostic re-entry.
 - **`scripts/pdf2md.py`** — convert a local PDF to Markdown with `pymupdf4llm`. The script delegates OCR to pymupdf4llm, which auto-engages Tesseract when a page has no extractable text.
+- **`scripts/stage.py`** — one-command staging: reads Zotero metadata (`zot --json read`), resolves the PDF, builds the YAML frontmatter, runs `pdf2md.py` for the body, and writes `Author_Year_Title.md` to the config's `output_dir`. Supports `--dry-run`, `--pdf`, `-o`, `--no-frontmatter`, `--force`, `--schema`, `--check`.
 - **`scripts/check_missing_raw.py`** — audit which PDFs in your Zotero library don't have a Markdown counterpart. Four-section report.
 - **`scripts/install_add_identifier.sh`** — opt-in installer for the "add by DOI/arXiv/ISBN/PMID" feature. Clones the translation-server, installs Python deps, copies wrapper scripts to `~/.local/bin/`. Only needed if you want to add papers by identifier from the terminal.
 - **`scripts/templates/zot-translation-server.sh`**, **`scripts/templates/zot-add-identifier.py`** — source templates for the two wrapper scripts. The install script copies them to `~/.local/bin/` with chmod +x.

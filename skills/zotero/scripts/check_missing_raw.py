@@ -43,13 +43,13 @@ DEFAULT_ZOTERO_STORAGE = Path.home() / "Zotero" / "storage"
 
 
 def _slugify_filename(author_last: str, year: str, title: str) -> str:
-    """Build the canonical Author_Year_Title... filename stem."""
-    author_part = re.sub(r"[^\w]", "", author_last)
-    year_part = re.sub(r"[^\d]", "", year)[:4]
-    title_clean = re.sub(r"[^\w\s]", "", title)
-    words = title_clean.split()[:12]
-    title_part = "_".join(words)
-    return f"{author_part}_{year_part}_{title_part}"
+    """Build the canonical Author_Year_Title... filename stem.
+
+    Delegates to _config._slugify_canonical so the staging tool
+    (scripts/stage.py) and this audit share one slugger and cannot
+    drift apart.
+    """
+    return _config._slugify_canonical(author_last, year, title)
 
 
 def _match_exists(stem: str, md_stems: set[str]) -> bool:
