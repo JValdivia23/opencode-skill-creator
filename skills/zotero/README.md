@@ -12,7 +12,7 @@ Copy-paste this to your AI agent:
 Install the zotero skill from https://github.com/JValdivia23/opencode-skill-creator by reading https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/docs/install-agent-zotero.md
 ```
 
-The install doc lists all 16 files to download (SKILL.md, README.md, LICENSE.txt, .gitignore, 4 scripts, 1 install script, 2 wrapper templates, 5 references).
+The install doc lists all 17 files to download (SKILL.md, README.md, LICENSE.txt, .gitignore, 4 scripts, 1 install script, 2 wrapper templates, 6 references).
 
 Or manually, in `~/.config/opencode/skills/zotero/`:
 
@@ -20,7 +20,7 @@ Or manually, in `~/.config/opencode/skills/zotero/`:
 mkdir -p ~/.config/opencode/skills/zotero/{scripts/templates,references}
 # Then download each file from:
 # https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/zotero/<filename>
-# where <filename> is each of the 16 files listed in docs/install-agent-zotero.md.
+# where <filename> is each of the 17 files listed in docs/install-agent-zotero.md.
 ```
 
 ## What you get

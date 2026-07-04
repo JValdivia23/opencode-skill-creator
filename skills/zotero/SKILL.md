@@ -259,21 +259,8 @@ Four-section report:
 - **`references/add-by-identifier.md`** — the magic-wand equivalent for the terminal. DOI/arXiv/ISBN/PMID, batch mode, the translation-server lifecycle, troubleshooting.
 - **`references/configuration.md`** — the `~/.zotero-skill/config.toml` format, layout options (`flat` / `by-year` / `by-collection`), how to re-run setup, why `~/.zotero-skill/` not `~/.config/zotero-skill/`.
 - **`references/pdf-path-resolution.md`** — the three approaches in full: SQLite (with the `database is locked` workaround), `zot open`, and `find`.
+- **`references/changelog.md`** — version history (loaded on demand, not every turn).
 
 For the upstream `zot` CLI source: https://github.com/Agents365-ai/zotero-cli-cc (the `zot` binary lives there; this skill is the workflow, not the CLI).
 
 For the translation-server that powers `zot-add-identifier`: https://github.com/zotero/translation-server.
-
-## Changelog
-
-### v1.0.0
-- Initial release.
-- `scripts/setup.py` — first-run config writer, `--check` re-entry mode.
-- `scripts/_config.py` — shared config loader.
-- `scripts/pdf2md.py` — pymupdf4llm-only PDF-to-Markdown converter, config-driven output_dir.
-- `scripts/check_missing_raw.py` — four-section audit (stubs, recent gaps, older gaps, missing-PDF).
-- `references/getting-started.md` — one-time setup narrative.
-- `references/zot-cheatsheet.md` — `zot` command reference subset.
-- `references/add-by-identifier.md` — DOI/arXiv/ISBN/PMID resolver docs.
-- `references/configuration.md` — config file format and layout options.
-- `references/pdf-path-resolution.md` — three approaches to find a PDF's local path.

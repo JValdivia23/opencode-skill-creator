@@ -27,11 +27,12 @@ For agents reading this file, install `zotero` by downloading these files into `
 14. https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/zotero/references/add-by-identifier.md
 15. https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/zotero/references/configuration.md
 16. https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/zotero/references/pdf-path-resolution.md
+17. https://raw.githubusercontent.com/JValdivia23/opencode-skill-creator/main/skills/zotero/references/changelog.md
 ```
 
 Validate by checking that `SKILL.md` exists and has valid frontmatter with `name` and `description` fields.
 
-Report success with the installation path and file count (expected: 16 files).
+Report success with the installation path and file count (expected: 17 files).
 
 ## Explicit Non-Automation Rule
 
@@ -43,7 +44,7 @@ Report success with the installation path and file count (expected: 16 files).
 
 After install, report:
 
-- Source: GitHub raw URLs (16 files)
+- Source: GitHub raw URLs (17 files)
 - Destination path
 - Complete installed file list
 - Validation status

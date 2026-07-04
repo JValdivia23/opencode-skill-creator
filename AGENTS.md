@@ -35,7 +35,7 @@ opencode-skill-creator/
 │       ├── LICENSE.txt         # MIT
 │       ├── scripts/            # setup.py, pdf2md.py, check_missing_raw.py, install_add_identifier.sh
 │       │   └── templates/      # zot-translation-server.sh, zot-add-identifier.py (used by install_add_identifier.sh)
-│       └── references/         # getting-started, zot-cheatsheet, add-by-identifier, configuration, pdf-path-resolution
+│       └── references/         # getting-started, zot-cheatsheet, add-by-identifier, configuration, pdf-path-resolution, changelog
 ├── docs/
 │   ├── install-agent.md
 │   ├── install-agent-python-ipynb.md
