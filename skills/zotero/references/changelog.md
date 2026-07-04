@@ -3,6 +3,11 @@
 The current version lives in `SKILL.md` frontmatter (`version:` field).
 This file holds the full version history — load it on demand, not every turn.
 
+## v1.0.1
+
+- Standardize md creation on the `Author_Year_Title` + YAML-frontmatter staging convention, matching the project-local zotero staging workflow. `SKILL.md` conversion section now mirrors staging: `zot --json read <KEY>` → `pdf2md.py -o <Author_Year_Title>.md` → prepend frontmatter (title, authors, year, doi, abstract, tags, collections, item_key, item_type, source_url, date, date_added, date_modified, pdf_path).
+- `scripts/pdf2md.py` and `scripts/check_missing_raw.py` unchanged. The audit's strict `Author_Year` prefix match now enforces the standard: a non-standard filename (e.g. kebab-case from a bare `pdf2md.py <pdf>` call) is flagged as missing, prompting re-staging.
+
 ## v1.0.0
 
 Initial release.
