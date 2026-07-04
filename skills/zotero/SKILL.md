@@ -1,7 +1,7 @@
 ---
 name: zotero
 description: "Add papers to a local Zotero library by DOI/arXiv/ISBN/PMID, read existing items, resolve PDF attachment paths, convert PDFs to Markdown, and audit which PDFs still need conversion. Use when the user mentions Zotero, papers, references, citations, DOIs, arXiv, or wants to stage a research library into Markdown."
-version: 1.0.2
+version: 1.0.3
 ---
 
 # Zotero

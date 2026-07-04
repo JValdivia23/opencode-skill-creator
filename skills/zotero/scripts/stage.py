@@ -212,7 +212,12 @@ def _validate_frontmatter(frontmatter_block: str, data: dict, key: str) -> None:
               file=sys.stderr)
         return
     try:
-        parsed = yaml.safe_load(frontmatter_block)
+        stripped = frontmatter_block
+        if stripped.startswith("---"):
+            stripped = stripped[3:].lstrip("\n")
+        if stripped.rstrip().endswith("---"):
+            stripped = stripped.rstrip()[:-3].rstrip("\n")
+        parsed = yaml.safe_load(stripped)
     except Exception as e:
         _die(f"emitted frontmatter is not valid YAML: {e}")
         sys.exit(1)

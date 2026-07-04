@@ -3,6 +3,10 @@
 The current version lives in `SKILL.md` frontmatter (`version:` field).
 This file holds the full version history — load it on demand, not every turn.
 
+## v1.0.3
+
+- Fix `scripts/stage.py` YAML round-trip validation: `yaml.safe_load` received the full `---`-wrapped frontmatter block and raised `ComposerError: expected a single document in the stream` (the trailing `---` started a second, empty document). Now strips the `---` markers before parsing. The bug only fired on real staging (`--force`), not `--dry-run` (which skips validation). `cmd_check` was already correct (it regex-extracts the inner content).
+
 ## v1.0.2
 
 - Add `scripts/stage.py` — one-command staging tool that wraps the v1.0.1 3-step workflow: `zot --json read <KEY>` → resolve PDF via SQLite → build 14-field YAML frontmatter → run `pdf2md.py` for the body → write `Author_Year_Title.md` to `output_dir`. Supports `--dry-run`, `--pdf <path>`, `-o <path>`, `--no-frontmatter`, `--force`, `--schema`, `--check <file>`. Optional PyYAML for frontmatter round-trip validation (skipped with a warning if absent).
