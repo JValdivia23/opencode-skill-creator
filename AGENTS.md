@@ -29,13 +29,17 @@ opencode-skill-creator/
 │   │   ├── SKILL.md            # Main skill definition
 │   │   └── scripts/
 │   │       └── python_ipynb_tool.py  # Agent helper for kernel ops and cell editing
-│   └── zotero/                # Shareable Zotero workflow skill (add papers, convert PDFs, audit)
+│   ├── zotero/                # Shareable Zotero workflow skill (add papers, convert PDFs, audit)
+│   │   ├── SKILL.md            # Main skill definition
+│   │   ├── README.md           # Install + overview
+│   │   ├── LICENSE.txt         # MIT
+│   │   ├── scripts/            # setup.py, pdf2md.py, stage.py, check_missing_raw.py, install_add_identifier.sh
+│   │   │   └── templates/      # zot-translation-server.sh, zot-add-identifier.py (used by install_add_identifier.sh)
+│   │   └── references/         # getting-started, zot-cheatsheet, add-by-identifier, configuration, pdf-path-resolution, changelog
+│   └── agy/                    # Shareable Antigravity CLI delegation skill
 │       ├── SKILL.md            # Main skill definition
-│       ├── README.md           # Install + overview
-│       ├── LICENSE.txt         # MIT
-│       ├── scripts/            # setup.py, pdf2md.py, stage.py, check_missing_raw.py, install_add_identifier.sh
-│       │   └── templates/      # zot-translation-server.sh, zot-add-identifier.py (used by install_add_identifier.sh)
-│       └── references/         # getting-started, zot-cheatsheet, add-by-identifier, configuration, pdf-path-resolution, changelog
+│       ├── scripts/            # agy-run.sh
+│       └── references/         # invoke.md, review.md, troubleshooting.md
 ├── docs/
 │   ├── install-agent.md
 │   ├── install-agent-python-ipynb.md
