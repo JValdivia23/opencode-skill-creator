@@ -4,7 +4,18 @@
 set -euo pipefail
 
 CACHE_DIR="${AGY_OPENCODE_CACHE:-${HOME}/.cache/agy-opencode}"
-AGY_BIN="${AGY_BIN:-agy}"
+AGY_BIN="${AGY_BIN:-}"
+if [[ -z "$AGY_BIN" ]]; then
+  if command -v agy >/dev/null 2>&1; then
+    AGY_BIN="$(command -v agy)"
+  elif [[ -x "$HOME/.local/bin/agy" ]]; then
+    AGY_BIN="$HOME/.local/bin/agy"
+  elif [[ -x "/opt/homebrew/bin/agy" ]]; then
+    AGY_BIN="/opt/homebrew/bin/agy"
+  else
+    AGY_BIN="agy"
+  fi
+fi
 TIMEOUT="${AGY_PRINT_TIMEOUT:-10m}"
 CONVERSATION=""
 USE_LAST=0
